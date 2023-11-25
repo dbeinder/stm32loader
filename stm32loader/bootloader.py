@@ -65,14 +65,16 @@ CHIP_IDS = {
     0x480: "STM32H7A3xx/B3xx",
     # RM0394 46.6.1 MCU device ID code
     0x435: "STM32L4xx",
-    # ST BlueNRG series; see ST AN4872.
-    # Three-byte ID where we mask out byte 1 (metal fix)
-    # and byte 2 (mask set).
-    # Requires parity None.
-    0x000003: "BlueNRG-1 160kB",
-    0x00000F: "BlueNRG-1 256kB",
-    0x000023: "BlueNRG-2 160kB",
-    0x00002F: "BlueNRG-2 256kB",
+    # ST BlueNRG series; see ST AN4872 (BlueNRG-1/2) and AN5471 (BlueNRG-LP/LPS)
+    #   Byte 1: metal fix (masked out)
+    #   Byte 2: mask set (masked out)
+    #   Byte 3: 0xHL
+    #           H: [0] BlueNRG-1, [2] BlueNRG-2, [3] BlueNRG-LP/LPS
+    #           L: [3] 160kB, [B] 192kB, [F] 256kB (masked out)
+    # BlueNRG requires parity None.
+    0x000000: "BlueNRG-1",
+    0x000020: "BlueNRG-2",
+    0x000030: "BlueNRG-LP/LPS",
     # STM32F0 RM0091 Table 136. DEV_ID and REV_ID field values
     0x440: "STM32F030x8",
     0x445: "STM32F070x6",
@@ -241,8 +243,10 @@ class Stm32Bootloader:
         "G0": 0x1FFF7590,
         # ST RM0453 section 39.1.1 Unique device ID register
         "WL": 0x1FFF7590,
-        # ST BlueNRG has DIE_ID register with PRODUCT, but no UID.
-        "NRG": None,
+        # ST PM0257 section 3.1.1 BLE addresses
+        "NRG": 0x100007F4,  # not readable from bootloader
+        # ST PM0269 section 4.1.1 Bluetooth Low Energy addresses
+        "NRG3": 0x10001EF0,  # not readable from bootloader
     }
 
     UID_SWAP = [[1, 0], [3, 2], [7, 6, 5, 4], [11, 10, 9, 8]]
@@ -281,7 +285,9 @@ class Stm32Bootloader:
         # ST RM0453 section 39.1.2 Flash size data register
         "WL": 0x1FFF75E0,
         # ST BlueNRG-2 datasheet
-        "NRG": 0x40100014,
+        "NRG": 0x40100014,  # not readable from bootloader
+        # ST BlueNRG-LP RM0479
+        "NRG3": 0x40001014  # not readable from bootloader
     }
 
     DATA_TRANSFER_SIZE = {
@@ -297,6 +303,7 @@ class Stm32Bootloader:
         "G0": 256,
         "WL": 256,
         "NRG": 256,
+        "NRG3": 256,
         # ST RM0433 section 4.2 FLASH main features
         "H7": 256,
     }
@@ -328,8 +335,9 @@ class Stm32Bootloader:
         # ST RM0444 section 38.2 Flash memory size data register
         "G0": 1024,
         "WL": 1024,
-        # ST BlueNRG-2 data sheet: 128 pages of 8 * 64 * 4 bytes
+        # ST BlueNRG-1/2/LP: 128 pages of 2kB
         "NRG": 2048,
+        "NRG3": 2048,
         # ST RM0433 section 4.2 FLASH main features
         "H7": 128 * 1024,
     }

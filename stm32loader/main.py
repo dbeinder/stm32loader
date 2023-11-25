@@ -139,12 +139,17 @@ class Stm32Loader:
             try:
                 if self.configuration.length is None:
                     # Erase full device.
+                    self.debug(0, "Performing full erase...")
                     self.stm32.erase_memory(pages=None)
                 else:
                     # Erase from address to address + length.
                     start_address = self.configuration.address
                     end_address = self.configuration.address + self.configuration.length
                     pages = self.stm32.pages_from_range(start_address, end_address)
+                    if self.configuration.family in ["NRG", "NRG3"]:
+                        first_page = 0x10040000 // 2048
+                        pages = [p - first_page for p in pages]
+                    self.debug(0, f"Performing partial erase (0x{start_address:x} - 0x{end_address:x}, {pages} pages)... ")
                     self.stm32.erase_memory(pages)
 
             except bootloader.CommandError:
@@ -185,15 +190,20 @@ class Stm32Loader:
         self.debug(0, "Bootloader version: 0x%X" % boot_version)
         device_id = self.stm32.get_id()
         family = self.configuration.family
-        if family == "NRG":
-            # ST AN4872.
-            # Three bytes encode metal fix, mask set,
-            # BlueNRG-series + flash size.
+        if family == "NRG" or family == "NRG3":
+            # ST AN4872 / AN5471
+            # Three bytes encode metal fix, mask set, BlueNRG-series, flash size
             metal_fix = (device_id & 0xFF0000) >> 16
             mask_set = (device_id & 0x00FF00) >> 8
-            device_id = device_id & 0x0000FF
-            self.debug(0, "Metal fix: 0x%X" % metal_fix)
-            self.debug(0, "Mask set: 0x%X" % mask_set)
+            flash_type = device_id & 0x00000F
+            nrg_flash_size_ids = {
+                0x3: 160,
+                0xB: 192,
+                0xF: 256
+            }
+            flash_size = nrg_flash_size_ids.get(flash_type, 0)
+            device_id = device_id & 0x0000F0
+            self.debug(0, f"Flash: {flash_size}kiB, Mask set: {mask_set}, Metal fix: {metal_fix}")
 
         self.debug(
             0, "Chip id: 0x%X (%s)" % (device_id, bootloader.CHIP_IDS.get(device_id, "Unknown"))
@@ -207,7 +217,10 @@ class Stm32Loader:
             return
 
         try:
-            if family not in ["F4", "L0"]:
+            if family in ["NRG", "NRG3"]:
+                # BlueNRG bootloader can't read peripherals
+                return
+            elif family not in ["F4", "L0"]:
                 flash_size = self.stm32.get_flash_size()
                 device_uid = self.stm32.get_uid()
             else:
