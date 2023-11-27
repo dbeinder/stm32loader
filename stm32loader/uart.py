@@ -47,7 +47,7 @@ class SerialConnection:
         # don't connect yet; caller should use connect() separately
         self.serial_connection = None
 
-        self._timeout = 5
+        self._timeout = 0.5
 
     @property
     def timeout(self):

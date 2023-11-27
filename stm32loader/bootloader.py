@@ -350,7 +350,7 @@ class Stm32Bootloader:
 
     SYNCHRONIZE_ATTEMPTS = 2
 
-    def __init__(self, connection, device=None, device_family=None, verbosity=5, show_progress=None):
+    def __init__(self, connection, device=None, device_family=None, verbosity=5, show_progress=None, low_tx_mode = False):
         """
         Construct the Stm32Bootloader object.
 
@@ -376,6 +376,7 @@ class Stm32Bootloader:
         self.flash_page_size = self.FLASH_PAGE_SIZE.get(device_family or "default")
         self.device_family = device_family or "F1"
         self.device = device
+        self.low_tx_mode = low_tx_mode
 
     def write(self, *data):
         """Write the given data to the MCU."""
@@ -447,6 +448,7 @@ class Stm32Bootloader:
 
     def get(self):
         """Return the bootloader version and remember supported commands."""
+        start_t = time.monotonic()
         self.command(self.Command.GET, "Get")
         length = bytearray(self.connection.read())[0]
         version = bytearray(self.connection.read())[0]
@@ -456,6 +458,9 @@ class Stm32Bootloader:
         self.extended_erase = self.Command.EXTENDED_ERASE in self.supported_commands
         self.debug(10, "    Available commands: " + ", ".join(hex(b) for b in self.supported_commands))
         self._wait_for_ack("0x00 end")
+        delta_t = time.monotonic() - start_t
+        if delta_t > 0.01:
+            print("Slow response (>10ms) from bootloader, please check latency settings of serial driver!")
         return version
 
     def get_version(self):
@@ -760,6 +765,19 @@ class Stm32Bootloader:
         self.debug(20, "    Reset after automatic chip reset due to readout unprotect")
         self.reset_from_system_memory()
 
+    def zero_balance(self, duration):
+        self.connection.serial_connection.break_condition = True
+        time.sleep(0.005 + duration * 1.1)
+        self.connection.serial_connection.break_condition = False
+
+        self.write(self.Command.SYNCHRONIZE)
+        read_data = bytearray(self.connection.read())
+        if read_data and read_data[0] in (self.Reply.ACK, self.Reply.NACK):
+            pass
+        else:
+            print("failed to resync after DC balance")
+            print(read_data)
+
     def read_memory_data(self, address, length):
         """
         Return flash content from the given address and byte count.
@@ -777,7 +795,11 @@ class Stm32Bootloader:
                     "Read %(len)d bytes at 0x%(address)X"
                     % {"address": address, "len": read_length},
                 )
+                start_t = time.monotonic()
                 data = data + self.read_memory(address, read_length)
+                duration = time.monotonic() - start_t
+                if self.low_tx_mode:
+                    self.zero_balance(duration)
                 progress_bar.next()
                 length = length - read_length
                 address = address + read_length
@@ -802,7 +824,11 @@ class Stm32Bootloader:
                     "Write %(len)d bytes at 0x%(address)X"
                     % {"address": address, "len": write_length},
                 )
+                start_t = time.monotonic()
                 self.write_memory(address, data[offset : offset + write_length])
+                duration = time.monotonic() - start_t
+                if self.low_tx_mode:
+                    self.zero_balance(duration)
                 progress_bar.next()
                 length -= write_length
                 offset += write_length

@@ -22,6 +22,8 @@
 
 
 import sys
+import time
+import traceback
 from types import SimpleNamespace
 from pathlib import Path
 import serial
@@ -103,10 +105,23 @@ class Stm32Loader:
             verbosity=self.configuration.verbosity,
             show_progress=show_progress,
             device_family=self.configuration.family,
+            low_tx_mode=self.configuration.zero_balance
         )
 
         try:
-            print("Activating bootloader (select UART)")
+            if self.configuration.zero_reset:
+                reset_sec = 8.5
+                start_time = time.monotonic()
+                serial_connection.serial_connection.break_condition = True
+                print("")
+                while time.monotonic() < start_time + reset_sec:
+                    print(f"\033[1AResetting with serial break condition... ({time.monotonic() - start_time:.1f} / {reset_sec:.1f} sec)")
+                    time.sleep(0.1)
+                serial_connection.serial_connection.break_condition = False
+                serial_connection.serial_connection.reset_input_buffer()
+                time.sleep(0.1)
+                serial_connection.serial_connection.reset_input_buffer()
+            print("Activating bootloader...")
             self.stm32.reset_from_system_memory()
         except bootloader.CommandError:
             print(
@@ -203,6 +218,7 @@ class Stm32Loader:
         try:
             device_uid = self.stm32.get_uid()
         except bootloader.CommandError as e:
+            print(traceback.format_exc())
             self.debug(
                 0,
                 "Something was wrong with reading chip UID: " + str(e),
