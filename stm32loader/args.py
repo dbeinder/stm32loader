@@ -94,6 +94,20 @@ def parse_arguments(arguments):
     )
 
     parser.add_argument(
+        "-zr",
+        "--zero-reset",
+        action="store_true",
+        help="Reset the chip using a long break condition",
+    )
+
+    parser.add_argument(
+        "-z",
+        "--zero-balance",
+        action="store_true",
+        help="Keep the DC balance of TX low to avoid early reset",
+    )
+
+    parser.add_argument(
         "-r", "--read", action="store_true", help="Read from flash and store in local file."
     )
 
