@@ -12,16 +12,34 @@ DEVICE_DETAILS = [
     # Based on ST AN2606 section "Device-dependent bootloader parameters".
     # Flash range, option bytes and flags gleaned from
     # stm32flash, dev_table.c.
+
+    # Other possibly known devices from AN2606 rev 66:
+    # 0x44C STM32C051xx
+    # 0x493 STM32C071xx
+    # 0x44D STM32C091xx/92xx
+    # 0x474 STM32H503xx
+    # 0x484 STM32H563xx/573xx
+    # 0x478 STM32H523xx/33xxx
+    # 0x485 STM32H7Rxxx/7Sxxx
+    # 0x459 STM32U031xx
+    # 0x489 STM32U073xx/83xx
+    # 0x454 STM32U375xx/85xx
+    # 0x455 STM32U535xx/545xx
+    # 0x481 STM32U595xx/599xx/5A9xx
+    # 0x476 STM32U5F7xx/5F9xx/5G7xx/5G9xx
+    # 0x492 STM32WBA52xx/54xx/55xx
+    # 0x4B0 STM32WBA62xx/64xx/65xx
+
     # FIXME flash?
     DeviceInfo(
         "C0",
         "STM32C011xx",
         0x443,
         0x51,
-        ram=(0x_2000_0000, 0x_2000_3000),
+        ram=(0x_2000_1000, 0x_2000_3000),
         system=(0x_1FFF_0000, 0x_1FFF_1800),
-        flash=None,
-        option=None,
+        flash=(0x_0800_0000, 0x_0800_8000),
+        option=(0x_1FFF_7800, 0x_1FFF_787F),
     ),
     # FIXME flash?
     # Error in AN2606? Ram is mentioned as 0x_2000_2000 - 0x_2000_17FF
@@ -881,7 +899,7 @@ DEVICE_DETAILS = [
         ram=(0x_2000_2000, 0x_2001_0000),
         system=(0x_1FFF_0000, 0x_1FFF_4000),
         flash=(0x_0800_0000, 0x_0804_0000, 2 * kB),
-        option=(0x_1FFF_7800, 0x_1FFF_8000),
+        option=(0x_1FFF_7800, 0x_1FFF_7FFF),
         bootloader_id_address=0x_1FFF_3EFE,
     ),
     # FIXME flash config?

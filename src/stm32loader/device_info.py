@@ -6,7 +6,7 @@ kB = 1024  # pylint: disable=invalid-name
 
 
 class DeviceInfo:  # pylint: disable=too-many-instance-attributes
-    """Hold info about"""
+    """Hold info about an STM32 device."""
 
     def __init__(  # pylint: disable=too-many-positional-arguments,too-many-arguments
         self,
