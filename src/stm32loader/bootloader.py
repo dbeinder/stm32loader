@@ -509,16 +509,21 @@ class Stm32Bootloader:  # pylint: disable=too-many-instance-attributes
 
         Return UID_NOT_SUPPORTED if the device does not have
         a UID.
-        Return UIT_ADDRESS_UNKNOWN if the address of the device's
+        Return UID_ADDRESS_UNKNOWN if the address of the device's
         UID is not known.
 
-        :return bytearray: UID bytes of the device, or 0 or -1 when
+        :return byterary: UID bytes of the device, or 0 or -1 when
           not available.
         """
-        if self.device_family in ["F4", "L0"]:
+        if self.device.flags & DeviceFlag.LONG_UID_ACCESS:
+            # F4 and L0 families.
             _flash_size, uid = self._get_flash_size_and_uid_bulk()
-            return uid
-        return self._get_uid_raw()
+        else:
+            if not self.device.family.uid_address:
+                return self.UID_NOT_SUPPORTED
+            uid = self.read_memory(self.device.family.uid_address, 12)
+
+        return uid
 
     @lru_cache(maxsize=2)
     def _get_flash_size_raw(self):
@@ -567,25 +572,6 @@ class Stm32Bootloader:  # pylint: disable=too-many-instance-attributes
         flash_size = data[flash_size_lsb_address] + (data[flash_size_lsb_address + 1] << 8)
 
         return flash_size, device_uid
-
-    def get_uid(self):
-        """
-        Send the 'Get UID' command and return the device UID.
-
-        Return UID_NOT_SUPPORTED if the device does not have
-        a UID.
-
-        :return byterary: UID bytes of the device, or 0 or -1 when
-          not available.
-        """
-        if self.device.flags & DeviceFlag.LONG_UID_ACCESS:
-            _flash_size, uid = self.get_flash_size_and_uid()
-        else:
-            if not self.device.family.uid_address:
-                return self.UID_NOT_SUPPORTED
-            uid = self.read_memory(self.device.family.uid_address, 12)
-
-        return uid
 
     def detect_device(self) -> None:
         """Detect the device type and store in `device`."""

@@ -204,7 +204,6 @@ class Stm32Loader:
     def read_device_uid(self):
         """Show chip UID."""
         try:
-            flash_size = self.stm32.get_flash_size()
             device_uid = self.stm32.get_uid()
         except bootloader.CommandError as e:
             self.debug(
