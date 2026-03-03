@@ -271,7 +271,7 @@ def test_get_flash_size_and_uid_for_exception_families_returns_size_and_uid(conn
     bootloader.read_memory.return_value = memory_block
 
     assert bootloader.get_flash_size() == 0x0201
-    assert bootloader.get_uid() == b'\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c'
+    assert bootloader.get_uid() == b"\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c"
 
 
 @pytest.mark.parametrize(
@@ -380,8 +380,8 @@ def test_get_flash_size_and_uid_bulk_populates_both_caches(connection):
     memory_block = bytearray([0] * 256)
     uid_offset = bootloader.UID_ADDRESS["F4"] & 0xFF
     flash_size_offset = bootloader.FLASH_SIZE_ADDRESS["F4"] & 0xFF
-    memory_block[uid_offset: uid_offset + 12] = b"bulk uid 12b"
-    memory_block[flash_size_offset: flash_size_offset + 2] = b"\x00\x02" # 512
+    memory_block[uid_offset : uid_offset + 12] = b"bulk uid 12b"
+    memory_block[flash_size_offset : flash_size_offset + 2] = b"\x00\x02"  # 512
     bootloader.read_memory.return_value = memory_block
 
     assert bootloader.get_flash_size() == 512

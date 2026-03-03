@@ -12,7 +12,6 @@ DEVICE_DETAILS = [
     # Based on ST AN2606 section "Device-dependent bootloader parameters".
     # Flash range, option bytes and flags gleaned from
     # stm32flash, dev_table.c.
-
     # Other possibly known devices from AN2606 rev 66:
     # 0x44C STM32C051xx
     # 0x493 STM32C071xx
@@ -29,7 +28,6 @@ DEVICE_DETAILS = [
     # 0x476 STM32U5F7xx/5F9xx/5G7xx/5G9xx
     # 0x492 STM32WBA52xx/54xx/55xx
     # 0x4B0 STM32WBA62xx/64xx/65xx
-
     # FIXME flash?
     DeviceInfo(
         "C0",
