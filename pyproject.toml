@@ -1,6 +1,7 @@
 [project]
 name = "stm32loader"
 description = "Flash firmware to STM32 microcontrollers using Python."
+version = "1.0.0-dev0"
 readme = "README.md"
 authors = [
     {name = "jsnyder"},
@@ -27,7 +28,6 @@ dependencies = [
     "pyserial",
     "progress",
 ]
-version = "0.8.0"
 
 [build-system]
 requires = ["uv_build>=0.9.17,<0.10.0"]
@@ -69,7 +69,6 @@ SourceCode = "https://github.com/florisla/stm32loader"
 
 
 [tool.bumpversion]
-current_version = "0.7.1-dev0"
 commit = true
 tag = true
 message = "release: Bump version number from v{current_version} to v{new_version}"
@@ -87,7 +86,7 @@ values = [
 ]
 
 [[tool.bumpversion.files]]
-filename = "stm32loader/__init__.py"
+filename = "src/stm32loader/__init__.py"
 parse = "\\((?P<major>\\d+),\\s(?P<minor>\\d+),\\s(?P<patch>\\d+)(\\s*,\\s*\"(?P<release>[^\"]+)\"\\s*,\\s*(?P<devrelease>\\d+))?\\)"
 serialize = [
     "({major}, {minor}, {patch}, \"{release}\", {devrelease})",
@@ -95,6 +94,11 @@ serialize = [
 ]
 search = "__version_info__ = {current_version}"
 replace = "__version_info__ = {new_version}"
+
+[[tool.bumpversion.files]]
+filename = "src/stm32loader/__init__.py"
+search = "__version__ = \"{current_version}\""
+replace = "__version__ = \"{new_version}\""
 
 
 [tool.ruff]
