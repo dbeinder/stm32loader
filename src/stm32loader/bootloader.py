@@ -772,8 +772,12 @@ class Stm32Bootloader:  # pylint: disable=too-many-instance-attributes
 
     def write_unprotect(self):
         """Disable write protection of the flash memory."""
+        self.debug(10, "Disabling write protection")
         self.command(self.Command.WRITE_UNPROTECT, "Write unprotect")
         self._wait_for_ack("0x73 write unprotect failed")
+
+        time.sleep(0.1)
+        self.reset_from_system_memory()
         self.debug(10, "    Write Unprotect done")
 
     def readout_protect(self):

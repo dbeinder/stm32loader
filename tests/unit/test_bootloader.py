@@ -205,6 +205,14 @@ def test_write_protect_sends_page_addresses_and_checksum(bootloader, write):
     assert write.data_was_written(b"\x01\x08\x08")
 
 
+def test_write_unprotect_sends_command(bootloader, write):
+    bootloader.write_unprotect()
+    assert write.data_was_written(b"\x73"), write.written_data
+    assert write.data_was_written(bytearray([Stm32Bootloader.Command.SYNCHRONIZE])), (
+        write.written_data
+    )
+
+
 def test_verify_data_with_identical_data_passes():
     Stm32Bootloader.verify_data(b"\x05", b"\x05")
 
