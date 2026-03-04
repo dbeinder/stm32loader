@@ -1,8 +1,8 @@
 # STM32Loader
 
 [![PyPI package](https://badge.fury.io/py/stm32loader.svg)](https://badge.fury.io/py/stm32loader)
-[![GitHub Actions](https://img.shields.io/github/workflow/status/florisla/stm32loader/Test?label=tests)](https://github.com/florisla/stm32loader/actions/workflows/test.yaml)
-[![GitHub Actions](https://img.shields.io/github/workflow/status/florisla/stm32loader/Lint?label=lint)](https://github.com/florisla/stm32loader/actions/workflows/lint.yaml)
+[![Test](https://github.com/florisla/stm32loader/actions/workflows/test.yaml/badge.svg)](https://github.com/florisla/stm32loader/actions/workflows/test.yaml)
+[![Lint](https://github.com/florisla/stm32loader/actions/workflows/lint.yaml/badge.svg)](https://github.com/florisla/stm32loader/actions/workflows/lint.yaml)
 [![License](https://img.shields.io/pypi/l/stm32loader.svg)](https://pypi.org/project/stm32loader/)
 [![Downloads](https://pepy.tech/badge/stm32loader)](https://pepy.tech/project/stm32loader)
 
