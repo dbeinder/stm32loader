@@ -190,9 +190,3 @@ adapter (it needs to toggle, whereas `BOOT0` does not).
 * Command-line argument for write protection.
 * STM8 devices (ST `UM0560`).
 * Other bootloader protocols (e.g. I2C, HEX -> implemented in `stm32flash`).
-
-
-## Future work
-
-* Use f-strings.
-* Use proper logging instead of print statements.
