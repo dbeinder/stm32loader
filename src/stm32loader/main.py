@@ -141,6 +141,16 @@ class Stm32Loader:
                 self.debug(0, "Quit")
                 self.stm32.reset_from_flash()
                 sys.exit(1)
+
+        if self.configuration.write_unprotect:
+            try:
+                self.stm32.write_unprotect()
+            except bootloader.CommandError:
+                self.debug(0, "Flash write unprotect failed")
+                self.debug(0, "Quit")
+                self.stm32.reset_from_flash()
+                sys.exit(1)
+
         if self.configuration.erase:
             try:
                 if self.configuration.length is None:

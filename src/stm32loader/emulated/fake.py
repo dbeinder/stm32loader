@@ -61,6 +61,10 @@ class FakeConnection:
             command_bytes = yield
             command_value = struct.unpack("B", command_bytes)[0]
 
+            # No CRC is sent for SYNCHRONIZE
+            if command_value == self.Command.SYNCHRONIZE:
+                continue
+
             # Receive CRC byte.
             yield
             self.ack()
@@ -112,8 +116,12 @@ class FakeConnection:
                 # Record data in flash memory.
                 flash_offset = address - 0x_0800_0000
                 self.flash_memory[flash_offset : flash_offset + byte_count] = data
+
+            elif command_value == self.Command.WRITE_UNPROTECT.value:
+                pass
+
             else:
-                raise NotImplementedError()
+                raise NotImplementedError(hex(command_value))
 
     def write(self, data):
         # Send to coroutine.
@@ -132,11 +140,12 @@ class FakeConnection:
 class FakeConfiguration:
     """Represent a configuration for test purposes."""
 
-    def __init__(self, erase, write, verify, firmware_file, family=None):
+    def __init__(self, erase, write, verify, write_unprotect, firmware_file, family=None):
         self.erase = erase
         self.write = write
         self.verify = verify
         self.data_file = firmware_file
+        self.write_unprotect = write_unprotect
         self.unprotect = False
         self.protect = False
         self.length = None
