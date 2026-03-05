@@ -216,8 +216,8 @@ def parse_arguments(arguments):
         port_arg.required = True
         atexit.register(
             lambda: print(
-                "{}: note: you can also set the environment "
-                "variable STM32LOADER_SERIAL_PORT".format(parser.prog),
+                f"{parser.prog}: note: you can also set the environment"
+                " variable STM32LOADER_SERIAL_PORT",
                 file=sys.stderr,
             )
         )
