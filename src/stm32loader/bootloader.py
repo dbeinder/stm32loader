@@ -363,7 +363,7 @@ class Stm32Bootloader:  # pylint: disable=too-many-instance-attributes
     SYNCHRONIZE_ATTEMPTS = 2
 
     def __init__(  # pylint: disable=too-many-positional-arguments,too-many-arguments
-        self, connection, device=None, device_family=None, verbosity=5, show_progress=None
+        self, connection, device=None, device_family=None, verbosity=5, show_progress=None, lie_boot=False, lie_no_exit=False
     ):
         """
         Construct the Stm32Bootloader object.
@@ -390,6 +390,8 @@ class Stm32Bootloader:  # pylint: disable=too-many-instance-attributes
         self.flash_page_size = self.FLASH_PAGE_SIZE.get(device_family or "default")
         self.device_family = device_family or "F1"
         self.device = device
+        self.lie_boot = lie_boot
+        self.lie_no_exit = lie_no_exit
 
     def write(self, *data):
         """Write the given data to the MCU."""
@@ -412,8 +414,11 @@ class Stm32Bootloader:  # pylint: disable=too-many-instance-attributes
 
     def reset_from_system_memory(self):
         """Reset the MCU with boot0 enabled to enter the bootloader."""
-        self._enable_boot0(True)
-        self._reset()
+        if self.lie_boot:
+            self.connection.send_lie_bootloader_trigger(True)
+        else:
+            self._enable_boot0(True)
+            self._reset()
 
         # Flush the input buffer to avoid reading old data.
         # It's known that the CP2102N at high baudrate fails to flush
@@ -433,6 +438,9 @@ class Stm32Bootloader:  # pylint: disable=too-many-instance-attributes
         for attempt in range(self.SYNCHRONIZE_ATTEMPTS):
             if attempt:
                 print("Bootloader activation timeout -- retrying")
+                if self.lie_boot:
+                    self.connection.send_lie_bootloader_trigger(False)
+                    self.connection.send_lie_bootloader_trigger(True)
             self.write(self.Command.SYNCHRONIZE)
             read_data = bytearray(self.connection.read())
 
@@ -445,8 +453,13 @@ class Stm32Bootloader:  # pylint: disable=too-many-instance-attributes
 
     def reset_from_flash(self):
         """Reset the MCU with boot0 disabled."""
-        self._enable_boot0(False)
-        self._reset()
+        if self.lie_boot:
+            print("Deactivating LiE bootloader" + (" skipped" if self.lie_no_exit else ""))
+            if not self.lie_no_exit:
+                self.connection.send_lie_bootloader_trigger(False)
+        else:
+            self._enable_boot0(False)
+            self._reset()
 
     def command(self, command, description):
         """

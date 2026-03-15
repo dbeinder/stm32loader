@@ -201,6 +201,18 @@ def parse_arguments(arguments):
 
     parser.add_argument("--version", action="version", version=__version__)
 
+    parser.add_argument(
+        "--lie-boot",
+        action="store_true",
+        help="Force LiEnergy device into bootloader mode",
+    )
+
+    parser.add_argument(
+        "--lie-boot-skip-exit",
+        action="store_true",
+        help="Do not exit bootloader mode on LiEnergy devices",
+    )
+
     # Hack: We want certain arguments to be required when one
     # of -rwv is specified, but argparse doesn't support
     # conditional dependencies like that. Instead, we add the

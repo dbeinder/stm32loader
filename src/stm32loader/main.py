@@ -101,10 +101,12 @@ class Stm32Loader:
             verbosity=self.configuration.verbosity,
             show_progress=show_progress,
             device_family=self.configuration.family,
+            lie_boot=self.configuration.lie_boot,
+            lie_no_exit=self.configuration.lie_boot_skip_exit
         )
 
         try:
-            print("Activating bootloader (select UART)")
+            print(f"Activating {'LiE ' if self.configuration.lie_boot else ''}bootloader (select UART)")
             self.stm32.reset_from_system_memory()
         except bootloader.CommandError:
             print(

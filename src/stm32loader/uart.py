@@ -25,6 +25,7 @@ Offer support for toggling RESET and BOOT0.
 
 # Note: this file not named 'serial' because that name-clashed in Python 2
 
+import time
 import serial
 
 
@@ -46,7 +47,7 @@ class SerialConnection:
         # don't connect yet; caller should use connect() separately
         self.serial_connection = None
 
-        self._timeout = 5
+        self._timeout = 0.1
 
     @property
     def timeout(self):
@@ -120,6 +121,33 @@ class SerialConnection:
         else:
             self.serial_connection.setRTS(level)
 
-    def flush_imput_buffer(self):
+    def flush_input_buffer(self):
         """Flush the input buffer to remove any stale read data."""
         self.serial_connection.reset_input_buffer()
+    
+    def _wait_for_ms(self, ms):
+        t_start = time.monotonic()
+        time.sleep(ms/1000.0)
+        actual_ms = (time.monotonic() - t_start) * 1000
+        delta_ms = actual_ms - ms
+        if abs(delta_ms) > 2.0:
+            print(f"time.sleep was off by {delta_ms:+.1f}ms!")
+
+
+    def set_break_condition(self, val):
+        t_start = time.monotonic()
+        self.serial_connection.break_condition = val
+        op_ms = (time.monotonic() - t_start) * 1000
+        if (op_ms > 3.0):
+            print(f"Setting BREAK took: {op_ms:.1f}ms!")
+
+
+    def send_lie_bootloader_trigger(self, state: True):
+        self._wait_for_ms(70)
+        for n in range(4 if state else 3):
+            self.set_break_condition(True)
+            self._wait_for_ms(25)
+            self.set_break_condition(False)
+            self._wait_for_ms(25)
+        if not state: self._wait_for_ms(45)
+        self.flush_input_buffer()
