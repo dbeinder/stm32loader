@@ -767,7 +767,7 @@ class Stm32Bootloader:  # pylint: disable=too-many-instance-attributes
         self.debug(10, "    Extended Erase memory done")
 
     def write_protect(self, sectors=None) -> None:
-        """Enable write protection on the given flash pages."""
+        """Enable write protection on the given flash sectors."""
 
         if self.device is None:
             raise Stm32LoaderError(
