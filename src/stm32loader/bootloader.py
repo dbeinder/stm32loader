@@ -19,15 +19,14 @@
 
 """Talk to an STM32 native bootloader (see ST AN3155)."""
 
+from __future__ import annotations
+
 import enum
 import math
 import operator
 import struct
 import time
 from functools import lru_cache, reduce
-
-# FIXME: remove and switch to '|' syntax when Python 3.10+ is required.
-from typing import Optional
 
 from stm32loader.device_family import DeviceFamily, DeviceFlag
 from stm32loader.device_info import DeviceInfo
@@ -359,7 +358,7 @@ class Stm32Bootloader:  # pylint: disable=too-many-instance-attributes
         "H7": 128 * 1024,
     }
 
-    device: Optional[DeviceInfo]
+    device: DeviceInfo | None
 
     SYNCHRONIZE_ATTEMPTS = 2
 

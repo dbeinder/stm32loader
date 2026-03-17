@@ -1,7 +1,6 @@
 """Hold information about different STM32 devices."""
 
-# FIXME: remove and switch to '|' syntax when Python 3.10+ is required.
-from typing import Optional, Union
+from __future__ import annotations
 
 from stm32loader.device_family import DEVICE_FAMILIES, DeviceFamily, DeviceFlag
 
@@ -103,10 +102,10 @@ class DeviceInfo:  # pylint: disable=too-many-instance-attributes
 class Flash:  # pylint: disable=too-few-public-methods
     """Represent info about a device's flash layout."""
 
-    start: Optional[int]
-    end: Optional[int]
-    page_size: Union[int, list[int], None]
-    pages_per_sector: Optional[int]
+    start: int | None
+    end: int | None
+    page_size: int | list[int] | None
+    pages_per_sector: int | None
     max_write_protection_sectors: int
 
     # RM0090 4 sectors of 16 Kbytes, 1 sector of 64 Kbytes,
@@ -140,14 +139,14 @@ class Flash:  # pylint: disable=too-few-public-methods
         self.max_write_protection_sectors = max_write_protection_sectors
 
     @property
-    def size(self) -> Optional[int]:
+    def size(self) -> int | None:
         """Return the size of the flash memory in bytes."""
         if self.start is None or self.end is None:
             return None
 
         return self.end - self.start
 
-    def num_pages(self) -> Optional[int]:
+    def num_pages(self) -> int | None:
         """Return the number of pages in the flash memory."""
         if self.size is None or self.page_size is None:
             return None
@@ -169,7 +168,7 @@ class Flash:  # pylint: disable=too-few-public-methods
             f"Flash size: {self.size}, total page size: {sum(self.page_size)}"
         )
 
-    def num_sectors(self) -> Optional[int]:
+    def num_sectors(self) -> int | None:
         """Return the number of sectors in the flash memory."""
         num_pages = self.num_pages()
         if num_pages is None or self.pages_per_sector is None:
